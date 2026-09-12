@@ -6,8 +6,8 @@ import { AppError } from "../errors/app-error";
 export class ProductController {
   private readonly productService: ProductService;
 
-  constructor() {
-    this.productService = new ProductService();
+  constructor(productService: ProductService = new ProductService()) {
+    this.productService = productService;
   }
 
   createProduct = async (
@@ -109,14 +109,11 @@ export class ProductController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const { id } = req.params;
-
-      const product = await this.productService.deleteProduct(id.toString());
+      await this.productService.deleteProduct(req.params.id.toString());
 
       res.status(200).json({
         success: true,
         message: "Product deleted successfully",
-        data: product,
       });
     } catch (error) {
       next(error);

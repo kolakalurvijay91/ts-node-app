@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import request from "supertest";
+import mongoose from "mongoose";
 
 import app from "../src/app";
 import { validProduct } from "./helpers/product-test-data";
@@ -156,5 +157,139 @@ describe("Product API", () => {
       expect(response.body.success).to.equal(false);
       expect(response.body.message).to.equal("Product not found");
     });
+  });
+
+  it("should return 400 when product name is missing", async () => {
+    const response = await request(app)
+      .post("/api/products")
+      .send({
+        description: "Product without a name",
+        price: 1000,
+        quantity: 5,
+        category: "Electronics",
+      })
+      .expect(400);
+
+    expect(response.body.success).to.equal(false);
+
+    expect(response.body.message).to.equal("Request validation failed");
+
+    expect(response.body.errors).to.be.an("array");
+  });
+
+  it("should return 400 when price is negative", async () => {
+    const response = await request(app)
+      .post("/api/products")
+      .send({
+        name: "Invalid Product",
+        description: "Product with invalid price",
+        price: -100,
+        quantity: 5,
+        category: "Electronics",
+      })
+      .expect(400);
+
+    expect(response.body.success).to.equal(false);
+
+    expect(response.body.message).to.equal("Request validation failed");
+
+    expect(response.body.errors).to.be.an("array");
+  });
+
+  it("should return 400 when quantity is negative", async () => {
+    const response = await request(app)
+      .post("/api/products")
+      .send({
+        name: "Invalid Quantity Product",
+        description: "Product with invalid quantity",
+        price: 1000,
+        quantity: -5,
+        category: "Electronics",
+      })
+      .expect(400);
+
+    expect(response.body.success).to.equal(false);
+
+    expect(response.body.message).to.equal("Request validation failed");
+
+    expect(response.body.errors).to.be.an("array");
+  });
+
+  it("should return 400 when product ID is invalid", async () => {
+    const response = await request(app)
+      .get("/api/products/invalid-product-id")
+      .expect(400);
+
+    expect(response.body.success).to.equal(false);
+
+    expect(response.body.message).to.equal("Request validation failed");
+
+    expect(response.body.errors).to.be.an("array");
+  });
+
+  it("should return 404 when product does not exist", async () => {
+    const productId = new mongoose.Types.ObjectId().toString();
+
+    const response = await request(app)
+      .get(`/api/products/${productId}`)
+      .expect(404);
+
+    expect(response.body).to.deep.equal({
+      success: false,
+      message: "Product not found",
+    });
+  });
+
+  it("should return 404 when updating a missing product", async () => {
+    const productId = new mongoose.Types.ObjectId().toString();
+
+    const response = await request(app)
+      .patch(`/api/products/${productId}`)
+      .send({
+        price: 9000,
+      })
+      .expect(404);
+
+    expect(response.body).to.deep.equal({
+      success: false,
+      message: "Product not found",
+    });
+  });
+
+  it("should return 404 when deleting a missing product", async () => {
+    const productId = new mongoose.Types.ObjectId().toString();
+
+    const response = await request(app)
+      .delete(`/api/products/${productId}`)
+      .expect(404);
+
+    expect(response.body).to.deep.equal({
+      success: false,
+      message: "Product not found",
+    });
+  });
+
+  it("should return 400 when page is invalid", async () => {
+    const response = await request(app)
+      .get("/api/products?page=0&limit=10")
+      .expect(400);
+
+    expect(response.body.success).to.equal(false);
+
+    expect(response.body.message).to.equal("Request validation failed");
+
+    expect(response.body.errors).to.be.an("array");
+  });
+
+  it("should return 400 when limit is invalid", async () => {
+    const response = await request(app)
+      .get("/api/products?page=1&limit=0")
+      .expect(400);
+
+    expect(response.body.success).to.equal(false);
+
+    expect(response.body.message).to.equal("Request validation failed");
+
+    expect(response.body.errors).to.be.an("array");
   });
 });

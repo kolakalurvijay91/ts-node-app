@@ -16,11 +16,7 @@ export class ProductRepository {
   async findAll(page: number = 1, limit: number = 20): Promise<IProduct[]> {
     const skip = (page - 1) * limit;
 
-    return ProductModel.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    return ProductModel.find().skip(skip).limit(limit).lean();
   }
 
   // Get product by ID
