@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "npm run build && mocha --require tsx/cjs \"tests/**/*.test.ts\"",
+    "test": "npm run build && mocha --require tsx/cjs --require ./tests/setup.ts \"tests/**/*.test.ts\"",
     "test:watch": "mocha --require tsx/cjs --watch \"tests/**/*.test.ts\""
   },
   "keywords": [],
