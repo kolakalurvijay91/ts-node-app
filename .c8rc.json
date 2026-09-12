@@ -1,0 +1,17 @@
+{
+  "all": true,
+  "extension": [".ts"],
+  "exclude": [
+    "src/server.ts",
+    "src/config/database.ts",
+    "src/**/*.d.ts",
+    "dist/**",
+    "tests/**"
+  ],
+  "reporter": ["text", "html"],
+  "check-coverage": true,
+  "lines": 80,
+  "functions": 80,
+  "branches": 70,
+  "statements": 80
+}

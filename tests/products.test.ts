@@ -3,7 +3,10 @@ import request from "supertest";
 import mongoose from "mongoose";
 
 import app from "../src/app";
-import { validProduct } from "./helpers/product-test-data";
+import {
+  validProductData,
+  anotherProductData,
+} from "./fixtures/product.fixture";
 
 describe("Product API", () => {
   let productId: string;
@@ -28,16 +31,16 @@ describe("Product API", () => {
     it("should create a product successfully", async () => {
       const response = await request(app)
         .post("/api/products")
-        .send(validProduct)
+        .send(validProductData)
         .expect(201);
 
       expect(response.body.success).to.equal(true);
       expect(response.body.message).to.equal("Product created successfully");
 
       expect(response.body.data).to.have.property("_id");
-      expect(response.body.data.name).to.equal(validProduct.name);
-      expect(response.body.data.price).to.equal(validProduct.price);
-      expect(response.body.data.quantity).to.equal(validProduct.quantity);
+      expect(response.body.data.name).to.equal(validProductData.name);
+      expect(response.body.data.price).to.equal(validProductData.price);
+      expect(response.body.data.quantity).to.equal(validProductData.quantity);
 
       productId = response.body.data._id;
     });
@@ -85,7 +88,7 @@ describe("Product API", () => {
 
       expect(response.body.success).to.equal(true);
       expect(response.body.data._id).to.equal(productId);
-      expect(response.body.data.name).to.equal(validProduct.name);
+      expect(response.body.data.name).to.equal(validProductData.name);
     });
 
     it("should reject an invalid product ID", async () => {

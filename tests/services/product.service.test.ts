@@ -6,6 +6,11 @@ import { ProductService } from "../../src/services/product.service";
 import { ProductRepository } from "../../src/repositories/product.repository";
 import { AppError } from "../../src/errors/app-error";
 
+import {
+  validProductData,
+  createProductResponse,
+} from "../fixtures/product.fixture";
+
 describe("ProductService Unit Tests", () => {
   let productService: ProductService;
   let productRepository: ProductRepository;
@@ -162,30 +167,19 @@ describe("ProductService Unit Tests", () => {
 
   describe("createProduct()", () => {
     it("should create and return a product", async () => {
-      const productData = {
-        name: "Laptop",
-        description: "Business laptop",
-        price: 75000,
-        quantity: 5,
-        category: "Computers",
-      };
-
-      const fakeProduct = {
-        _id: new mongoose.Types.ObjectId(),
-        ...productData,
-      };
+      const createdProduct = createProductResponse();
 
       const createStub = sinon
         .stub(productRepository, "create")
-        .resolves(fakeProduct as never);
+        .resolves(createdProduct as never);
 
-      const result = await productService.createProduct(productData);
-
-      expect(result).to.deep.equal(fakeProduct);
+      const result = await productService.createProduct(validProductData);
 
       expect(createStub.calledOnce).to.equal(true);
 
-      expect(createStub.calledWith(productData)).to.equal(true);
+      expect(createStub.firstCall.args[0]).to.deep.equal(validProductData);
+
+      expect(result).to.equal(createdProduct);
     });
   });
 

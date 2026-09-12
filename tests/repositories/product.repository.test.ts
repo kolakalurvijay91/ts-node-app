@@ -2,9 +2,14 @@ import { expect } from "chai";
 import sinon from "sinon";
 import mongoose from "mongoose";
 
-import { ProductModel, IProduct } from "../../src/models/product.model.js";
+import { ProductModel, IProduct } from "../../src/models/product.model";
 
-import { ProductRepository } from "../../src/repositories/product.repository.js";
+import { ProductRepository } from "../../src/repositories/product.repository";
+import {
+  validProductData,
+  anotherProductData,
+  createProductResponse,
+} from "../fixtures/product.fixture";
 
 describe("ProductRepository Unit Tests", () => {
   let productRepository: ProductRepository;
@@ -18,27 +23,18 @@ describe("ProductRepository Unit Tests", () => {
   });
 
   it("should create a product", async () => {
-    const productData: IProduct = {
-      name: "Laptop",
-      description: "Business laptop",
-      price: 75000,
-      quantity: 10,
-      category: "Electronics",
-    };
-
-    const createdProduct = {
-      _id: new mongoose.Types.ObjectId(),
-      ...productData,
-    };
+    const createdProduct = createProductResponse();
 
     const createStub = sinon
       .stub(ProductModel, "create")
       .resolves(createdProduct as never);
 
-    const result = await productRepository.create(productData);
+    const result = await productRepository.create(validProductData);
 
     expect(createStub.calledOnce).to.equal(true);
-    expect(createStub.calledWith(productData)).to.equal(true);
+
+    expect(createStub.firstCall.args[0]).to.deep.equal(validProductData);
+
     expect(result).to.equal(createdProduct);
   });
 
