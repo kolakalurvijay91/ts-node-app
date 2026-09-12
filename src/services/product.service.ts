@@ -1,3 +1,6 @@
+import mongoose from "mongoose";
+
+import { AppError } from "../errors/app-error";
 import { IProduct } from "../models/product.model";
 
 import { ProductRepository } from "../repositories/product.repository";
@@ -9,6 +12,11 @@ export class ProductService {
     this.productRepository = new ProductRepository();
   }
 
+  private validateProductId(productId: string): void {
+    if (!mongoose.isValidObjectId(productId)) {
+      throw new AppError("Invalid Product ID", 400);
+    }
+  }
   async createProduct(productData: IProduct) {
     return this.productRepository.create(productData);
   }
@@ -34,14 +42,17 @@ export class ProductService {
   }
 
   async getProductById(productId: string) {
+    this.validateProductId(productId);
     return this.productRepository.findById(productId);
   }
 
   async updateProduct(productId: string, updateData: Partial<IProduct>) {
+    this.validateProductId(productId);
     return this.productRepository.updateById(productId, updateData);
   }
 
   async deleteProduct(productId: string) {
+    this.validateProductId(productId);
     return this.productRepository.deleteById(productId);
   }
 }

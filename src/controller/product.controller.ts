@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 import { ProductService } from "../services/product.service";
+import { AppError } from "../errors/app-error";
 
 export class ProductController {
   private readonly productService: ProductService;
@@ -58,12 +59,7 @@ export class ProductController {
       const product = await this.productService.getProductById(id.toString());
 
       if (!product) {
-        res.status(404).json({
-          success: false,
-          message: "Product not found",
-        });
-
-        return;
+        throw new AppError("Product not found", 404);
       }
 
       res.status(200).json({
