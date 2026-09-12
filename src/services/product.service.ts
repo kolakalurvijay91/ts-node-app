@@ -21,8 +21,6 @@ export class ProductService {
     const safePage = Math.max(1, page);
     const safeLimit = Math.min(Math.max(1, limit), 100);
 
-    const skip = (safePage - 1) * safeLimit;
-
     const [products, total] = await Promise.all([
       this.productRepository.findAll(safePage, safeLimit),
       this.productRepository.count(),
