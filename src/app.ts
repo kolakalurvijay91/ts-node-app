@@ -29,7 +29,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/products", productRoutes);
-app.use(errorMiddleware);
 app.use(notFoundMiddleware);
+app.use(errorMiddleware);
 
 export default app;

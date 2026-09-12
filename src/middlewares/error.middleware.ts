@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+
 import mongoose from "mongoose";
+
 import { AppError } from "../errors/app-error";
 
 export const errorMiddleware = (
@@ -15,19 +17,33 @@ export const errorMiddleware = (
       success: false,
       message: error.message,
     });
+
+    return;
+  }
+
+  if (error instanceof mongoose.Error.ValidationError) {
+    res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors: Object.values(error.errors).map(
+        (validationError) => validationError.message,
+      ),
+    });
+
     return;
   }
 
   if (error instanceof mongoose.Error.CastError) {
     res.status(400).json({
       success: false,
-      message: "Invalid Product ID",
+      message: "Invalid product ID",
     });
+
     return;
   }
 
   res.status(500).json({
     success: false,
-    message: "Internal Server Error",
+    message: "Internal server error",
   });
 };
