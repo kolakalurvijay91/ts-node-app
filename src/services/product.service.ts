@@ -1,58 +1,87 @@
 import mongoose from "mongoose";
 
-import { AppError } from "../errors/app-error";
-import { IProduct } from "../models/product.model";
-
 import { ProductRepository } from "../repositories/product.repository";
+
+import { IProduct, ProductDocument } from "../models/product.model";
+
+import { AppError } from "../errors/app-error";
 
 export class ProductService {
   private readonly productRepository: ProductRepository;
 
-  constructor() {
-    this.productRepository = new ProductRepository();
+  constructor(productRepository: ProductRepository = new ProductRepository()) {
+    this.productRepository = productRepository;
   }
 
-  private validateProductId(productId: string): void {
-    if (!mongoose.isValidObjectId(productId)) {
-      throw new AppError("Invalid Product ID", 400);
-    }
-  }
-  async createProduct(productData: IProduct) {
+  async createProduct(productData: IProduct): Promise<ProductDocument> {
     return this.productRepository.create(productData);
   }
 
-  async getProducts(page: number = 1, limit: number = 20) {
-    const validPage = Math.max(1, page);
-    const validLimit = Math.min(Math.max(1, limit), 100);
+  async getProducts(page = 1, limit = 20) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.min(Math.max(1, limit), 100);
+
+    const skip = (safePage - 1) * safeLimit;
 
     const [products, total] = await Promise.all([
-      this.productRepository.findAll(validPage, validLimit),
+      this.productRepository.findAll(safePage, safeLimit),
       this.productRepository.count(),
     ]);
 
     return {
       products,
       pagination: {
-        page: validPage,
-        limit: validLimit,
+        page: safePage,
+        limit: safeLimit,
         total,
-        totalPages: Math.ceil(total / validLimit),
+        totalPages: Math.ceil(total / safeLimit),
       },
     };
   }
 
-  async getProductById(productId: string) {
+  async getProductById(productId: string): Promise<ProductDocument> {
     this.validateProductId(productId);
-    return this.productRepository.findById(productId);
+
+    const product = await this.productRepository.findById(productId);
+
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
+
+    return product;
   }
 
-  async updateProduct(productId: string, updateData: Partial<IProduct>) {
+  async updateProduct(
+    productId: string,
+    updateData: Partial<IProduct>,
+  ): Promise<ProductDocument> {
     this.validateProductId(productId);
-    return this.productRepository.updateById(productId, updateData);
+
+    const product = await this.productRepository.updateById(
+      productId,
+      updateData,
+    );
+
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
+
+    return product;
   }
 
-  async deleteProduct(productId: string) {
+  async deleteProduct(productId: string): Promise<void> {
     this.validateProductId(productId);
-    return this.productRepository.deleteById(productId);
+
+    const product = await this.productRepository.deleteById(productId);
+
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
+  }
+
+  private validateProductId(productId: string): void {
+    if (!mongoose.isValidObjectId(productId)) {
+      throw new AppError("Invalid product ID", 400);
+    }
   }
 }

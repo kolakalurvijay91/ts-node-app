@@ -113,15 +113,6 @@ export class ProductController {
 
       const product = await this.productService.deleteProduct(id.toString());
 
-      if (!product) {
-        res.status(404).json({
-          success: false,
-          message: "Product not found",
-        });
-
-        return;
-      }
-
       res.status(200).json({
         success: true,
         message: "Product deleted successfully",
